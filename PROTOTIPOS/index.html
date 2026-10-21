@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GearPilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F2EE; --ink:#15171C; --muted:#5B6068; --line:#DAD8D1; --soft:#ECEAE4;
+    --dark:#15171C; --dark2:#2A2D34; --accent:#C2410C; --plate:#F5C518;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Barlow',system-ui,sans-serif;font-size:15px}
+  h1,h2{font-family:'Barlow Condensed',sans-serif;margin:0;font-weight:700}
+  h1{font-size:44px;line-height:1}
+  h2{font-size:26px}
+  button{font:inherit;cursor:pointer}
+  .hidden{display:none !important}
+
+  /* Selector de modo */
+  .modes{display:flex;gap:8px;justify-content:center;padding:12px;background:#fff;border-bottom:1px solid var(--line)}
+  .modes button{min-height:44px;padding:0 20px;border:1px solid var(--line);border-radius:22px;background:#fff;font-weight:600}
+  .modes button.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+  /* Administrador */
+  .admin{display:flex;min-height:calc(100vh - 69px)}
+  .side{flex:0 0 240px;background:var(--dark);color:#E8E6E0;padding:28px 20px;display:flex;flex-direction:column;gap:28px}
+  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;letter-spacing:.05em;color:#fff;display:flex;gap:10px;align-items:center}
+  .side nav{display:flex;flex-direction:column;gap:4px}
+  .side nav button{min-height:44px;text-align:left;padding:0 14px;border:0;border-radius:6px;background:none;color:#C9CCD2}
+  .side nav button.on{background:var(--dark2);color:#fff;font-weight:600}
+  .me{margin-top:auto;padding-top:20px;border-top:1px solid var(--dark2);color:#fff;font-weight:600}
+  .me small{display:block;font-weight:400;color:#A3A7AE}
+  .main{flex:1;min-width:0;padding:32px 40px;display:flex;flex-direction:column;gap:24px}
+  .sub{margin:0 0 4px;color:var(--muted);font-size:14px}
+  .row{display:flex;flex-wrap:wrap;gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:20px 24px}
+  .stat{flex:1 1 180px;padding:18px 20px}
+  .stat span{color:var(--muted);font-size:14px}
+  .stat b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:52px;line-height:1.1}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:13px;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:13px 12px;border-bottom:1px solid var(--soft);white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  .scroll{overflow-x:auto}
+  .chip{display:inline-block;padding:4px 10px;border-radius:12px;font-size:13px;font-weight:600}
+  .proc{background:#FFE9D2;color:#7A3206}
+  .done{background:#DDEFE3;color:#174D2B}
+  .quote{background:#E6E7EB;color:#2F333B}
+  .plate{background:var(--plate);color:var(--ink);padding:2px 8px;border-radius:4px;border:2px solid var(--ink);font-weight:700;letter-spacing:.08em}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border:0;border-radius:6px;background:var(--accent);color:#fff;font-weight:600}
+  .btn.dark{background:var(--dark)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid #8C9098}
+  label{display:block;font-weight:600;margin-bottom:6px}
+  input,select{width:100%;min-height:48px;padding:0 12px;border:1px solid #8C9098;border-radius:6px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}
+  .field{margin-bottom:16px}
+  .hint{font-size:13px;color:var(--muted);margin-top:6px}
+  .alert{padding:12px 14px;border-radius:6px;background:#FBE4E1;color:#7C170F;margin-top:12px}
+  .steps{display:flex;flex-wrap:wrap;gap:12px;padding:0;margin:0;list-style:none}
+  .steps li{padding:8px 16px;border-radius:24px;border:1px solid var(--line);background:#fff}
+  .steps li.on{background:var(--dark);color:#fff;border-color:var(--dark);font-weight:600}
+  .sum{display:flex;justify-content:space-between;padding:8px 0}
+  .total{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700}
+  .seg{display:flex;flex-wrap:wrap;gap:8px}
+  .seg span{padding:10px 16px;border-radius:6px;background:var(--bg);color:#3A3F48}
+  .seg span.on{background:var(--dark);color:#fff;font-weight:600}
+
+  /* Cliente (móvil) */
+  .phone{width:100%;max-width:390px;min-height:780px;margin:24px auto;background:var(--bg);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+  .phone header{background:var(--dark);color:#fff;padding:20px}
+  .phone header .logo{font-size:20px}
+  .phone header h1{font-size:34px;margin-top:8px}
+  .phone .body{flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .tabs{display:flex;background:#fff;border-top:1px solid var(--line)}
+  .tabs button{flex:1;min-height:60px;border:0;background:none;font-size:13px;color:#3A3F48}
+  .tabs button.on{color:var(--accent);font-weight:600}
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pills button{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid #8C9098;background:#fff}
+  .pills button.on{background:var(--dark);color:#fff;border-color:var(--dark);font-weight:600}
+  .item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+  .item .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .item small{color:var(--muted)}
+  .bar{height:8px;border-radius:4px;background:#fff}
+  .bar div{height:8px;width:60%;border-radius:4px;background:var(--accent)}
+
+  @media (max-width:800px){
+    .admin{flex-direction:column}
+    .side{flex:none}
+    .main{padding:24px 16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="modes">
+  <button id="modeAdmin" class="on" onclick="setMode('admin')">Administrador</button>
+  <button id="modeCliente" onclick="setMode('cliente')">Cliente</button>
+</div>
+
+<!-- ===================== ADMINISTRADOR ===================== -->
+<div id="admin" class="admin">
+  <aside class="side">
+    <div class="logo">&#9881; GEARPILOT</div>
+    <nav>
+      <button class="on" data-view="a-panel">Panel</button>
+      <button data-view="a-ingreso">Ingreso de vehículo</button>
+      <button data-view="a-orden">Órdenes de trabajo</button>
+    </nav>
+    <div class="me">Administrador<small>Taller central</small></div>
+  </aside>
+
+  <main class="main">
+
+    <!-- Panel -->
+    <section id="a-panel" class="view" style="display:flex;flex-direction:column;gap:24px">
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><p class="sub" id="fecha"></p><h1>Panel del taller</h1></div>
+        <button class="btn" onclick="go('a-ingreso')">+ Registrar ingreso</button>
+      </div>
+      <div class="row">
+        <div class="card stat"><span>Vehículos en el taller</span><b>5</b></div>
+        <div class="card stat"><span>Órdenes en proceso</span><b>3</b></div>
+        <div class="card stat"><span>Cotizaciones por responder</span><b>1</b></div>
+        <div class="card stat"><span>Citas de hoy</span><b>3</b></div>
+      </div>
+      <div class="card" style="padding:18px 8px 8px">
+        <h2 style="padding:0 16px 8px">Órdenes de trabajo activas</h2>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Orden</th><th>Placa</th><th>Vehículo</th><th>Cliente</th><th>Mecánico</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td><b>OT-0148</b></td><td><span class="plate">KXR 482</span></td><td>Chevrolet Spark 2018</td><td>Laura Gómez</td><td>Andrés Ruiz</td><td><span class="chip proc">En proceso</span></td></tr>
+              <tr><td><b>OT-0147</b></td><td><span class="plate">PTM 109</span></td><td>Renault Logan 2015</td><td>Carlos Vega</td><td>Sofía Mejía</td><td><span class="chip proc">En proceso</span></td></tr>
+              <tr><td><b>OT-0146</b></td><td><span class="plate">HUB 731</span></td><td>Kia Picanto 2020</td><td>Diana Cruz</td><td>Jorge Pineda</td><td><span class="chip done">Completado</span></td></tr>
+              <tr><td><b>OT-0145</b></td><td><span class="plate">GJZ 220</span></td><td>Mazda 3 2019</td><td>Pedro Salas</td><td>Andrés Ruiz</td><td><span class="chip quote">Cotización enviada</span></td></tr>
+              <tr><td><b>OT-0144</b></td><td><span class="plate">WNA 556</span></td><td>Toyota Hilux 2017</td><td>Óscar Beltrán</td><td>Sofía Mejía</td><td><span class="chip proc">En proceso</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ingreso -->
+    <section id="a-ingreso" class="view hidden" style="flex-direction:column;gap:24px">
+      <div><p class="sub">Recepción</p><h1>Ingreso de vehículo</h1></div>
+      <ol class="steps"><li class="on">1 · Identificar vehículo</li><li>2 · Asignar mecánico</li><li>3 · Cotización al cliente</li></ol>
+      <div class="row" style="align-items:flex-start">
+        <div class="card" style="flex:1 1 340px">
+          <h2 style="margin-bottom:16px">Buscar por placa y documento</h2>
+          <div class="field"><label for="placa">Placa del vehículo</label><input id="placa" value="KXR 482"></div>
+          <div class="field">
+            <label for="doc">Documento del cliente o dueño</label>
+            <input id="doc" value="1032456789">
+            <div class="hint">Solo números. Máximo 3 intentos. Prueba escribir letras.</div>
+          </div>
+          <button class="btn dark" style="width:100%" onclick="buscar()">Buscar en el sistema</button>
+          <div id="docError" class="alert hidden"></div>
+        </div>
+        <div class="card" id="resultado" style="flex:1 1 340px">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <h2>Vehículo ya registrado</h2><span class="chip done">Cliente existente</span>
+          </div>
+          <p><span class="plate" style="font-size:20px;padding:4px 12px">KXR 482</span></p>
+          <p><b>Chevrolet Spark 2018</b><br><span class="sub">Laura Gómez · CC 1032456789</span></p>
+          <p class="sub"><b>Historial</b></p>
+          <div class="sum"><span>Alineación y balanceo</span><span class="sub">2 jun 2026</span></div>
+          <div class="sum"><span>Cambio de aceite y filtro</span><span class="sub">18 ene 2026</span></div>
+          <p class="hint">Si la placa no existe, se abre el registro de cliente y vehículo nuevos.</p>
+        </div>
+      </div>
+      <div class="card row" style="align-items:flex-end">
+        <div style="flex:1 1 240px"><label for="mec">Mecánico para el diagnóstico</label>
+          <select id="mec"><option>Andrés Ruiz · Frenos y suspensión</option><option>Sofía Mejía · Motor y electricidad</option><option>Jorge Pineda · Jefe de taller</option></select></div>
+        <div style="flex:2 1 300px"><label for="motivo">Motivo de ingreso</label><input id="motivo" value="Ruido al frenar y vibración en el volante"></div>
+        <button class="btn" onclick="go('a-orden')">Crear orden de trabajo</button>
+      </div>
+    </section>
+
+    <!-- Orden -->
+    <section id="a-orden" class="view hidden" style="flex-direction:column;gap:24px">
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><p class="sub">Orden de trabajo</p><h1>OT-0148 · Chevrolet Spark</h1></div>
+        <div><span class="plate">KXR 482</span> <span id="estadoChip" class="chip proc">En proceso</span></div>
+      </div>
+      <div class="card"><div class="seg"><b style="padding:10px 8px 10px 0">Estado del trabajo</b>
+        <span>Diagnóstico</span><span>Cotizado</span><span id="segProc" class="on">En proceso</span><span id="segDone">Completado</span></div></div>
+      <div class="row" style="align-items:flex-start">
+        <div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px">
+          <div class="card">
+            <h2>Diagnóstico</h2>
+            <p class="sub">Cliente: <b style="color:var(--ink)">Laura Gómez</b> · Mecánico: <b style="color:var(--ink)">Andrés Ruiz</b> · Ingreso: <b style="color:var(--ink)">19 oct 2026</b></p>
+            <p>Pastillas delanteras al límite de desgaste y discos con leve alabeo. Se recomienda cambio de pastillas, rectificado de discos y cambio de aceite con filtro.</p>
+          </div>
+          <div class="card">
+            <h2 style="margin-bottom:8px">Cotización</h2>
+            <div class="scroll"><table>
+              <thead><tr><th>Concepto</th><th>Tipo</th><th style="text-align:right">Valor</th></tr></thead>
+              <tbody>
+                <tr><td>Pastillas de freno delanteras</td><td>Repuesto</td><td style="text-align:right">$180.000</td></tr>
+                <tr><td>Aceite sintético 4 L</td><td>Repuesto</td><td style="text-align:right">$95.000</td></tr>
+                <tr><td>Filtro de aceite</td><td>Repuesto</td><td style="text-align:right">$38.000</td></tr>
+                <tr><td>Mano de obra y rectificado</td><td>Servicio</td><td style="text-align:right">$120.000</td></tr>
+              </tbody></table></div>
+            <div class="sum" style="border-top:2px solid var(--ink);margin-top:8px;align-items:baseline"><b>Total</b><span class="total">$433.000</span></div>
+            <p>Respuesta del cliente: <span class="chip done">Aceptada</span></p>
+          </div>
+        </div>
+        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:20px">
+          <div class="card">
+            <h2 style="margin-bottom:8px">Pagos</h2>
+            <div class="sum"><span class="sub">Total de la orden</span><b>$433.000</b></div>
+            <div class="sum"><span class="sub">Anticipo recibido</span><b>$200.000</b></div>
+            <div class="sum" style="border-top:1px solid var(--soft);align-items:baseline"><b>Saldo pendiente</b><span class="total" style="color:#9A3412">$233.000</span></div>
+            <button class="btn dark" style="width:100%">Registrar pago</button>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;gap:12px">
+            <h2>Acciones</h2>
+            <button class="btn" onclick="completar()">Marcar como completado</button>
+            <button class="btn ghost" onclick="go('a-panel')">Volver al panel</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===================== CLIENTE (móvil) ===================== -->
+<div id="cliente" class="hidden">
+  <div class="phone">
+    <header><div class="logo">&#9881; GEARPILOT</div><h1 id="cliTitulo">Agendar cita</h1></header>
+
+    <div class="body">
+      <!-- Agendar -->
+      <div id="c-agendar" class="cview" style="display:flex;flex-direction:column;gap:14px">
+        <div><label for="veh">Vehículo</label><select id="veh"><option>Chevrolet Spark · KXR 482</option></select></div>
+        <div class="row" style="gap:10px;flex-wrap:nowrap">
+          <div style="flex:1"><label for="fecha2">Fecha</label><input id="fecha2" value="Jue 22 oct"></div>
+          <div style="flex:1"><label for="hora">Hora</label><input id="hora" value="9:00 a. m." style="border:2px solid #B42318"></div>
+        </div>
+        <div class="alert" style="margin:0"><b>Ese horario no está disponible</b><br>Elige uno de los horarios libres.</div>
+        <b>Disponibles el jueves 22 de octubre</b>
+        <div class="pills" id="slots">
+          <button class="on">10:30 a. m.</button><button>2:00 p. m.</button><button>4:00 p. m.</button>
+        </div>
+        <b>Otros días</b>
+        <div class="pills" id="slots2">
+          <button>Vie 23 · 8:00 a. m.</button><button>Vie 23 · 11:00 a. m.</button><button>Sáb 24 · 9:00 a. m.</button>
+        </div>
+        <div><label for="mot">Motivo del servicio</label><input id="mot" value="Revisión de frenos"></div>
+        <button class="btn" id="confirmar" onclick="this.textContent='Cita confirmada ✓'">Confirmar cita · jue 22, 10:30 a. m.</button>
+      </div>
+
+      <!-- Historial -->
+      <div id="c-historial" class="cview hidden" style="flex-direction:column;gap:14px">
+        <div class="item" style="display:flex;gap:14px;align-items:center">
+          <span class="plate" style="font-size:20px;padding:6px 12px">KXR 482</span>
+          <div><b>Chevrolet Spark 2018</b><br><small>3 servicios registrados</small></div>
+        </div>
+        <div class="item" style="background:#FFE9D2;border:0;color:#5C2605;display:flex;flex-direction:column;gap:8px">
+          <div class="top"><b>OT-0148 · En proceso</b><small style="color:#5C2605">desde 19 oct</small></div>
+          Cambio de pastillas, rectificado de discos y aceite
+          <div class="bar"><div></div></div>
+        </div>
+        <h2>Historial de arreglos</h2>
+        <div class="item"><div class="top"><b>Alineación y balanceo</b><span class="chip done">Completado</span></div><small>2 jun 2026 · OT-0131 · Sofía Mejía</small></div>
+        <div class="item"><div class="top"><b>Cambio de aceite y filtro</b><span class="chip done">Completado</span></div><small>18 ene 2026 · OT-0102 · Andrés Ruiz</small></div>
+      </div>
+
+      <!-- Pagos -->
+      <div id="c-pagos" class="cview hidden" style="flex-direction:column;gap:14px">
+        <div class="item">
+          <small><b>Mecánico asignado · OT-0148</b></small>
+          <div style="display:flex;gap:14px;align-items:center;margin-top:10px">
+            <div style="width:52px;height:52px;border-radius:26px;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:18px">AR</div>
+            <div><b>Andrés Ruiz</b><br><small>Frenos y suspensión</small></div>
+          </div>
+        </div>
+        <div class="item">
+          <small><b>Orden OT-0148</b></small>
+          <div class="sum"><small>Total cotizado</small><b>$433.000</b></div>
+          <div class="sum"><small>Pagado</small><b>$200.000</b></div>
+          <div class="sum" style="border-top:1px solid var(--soft);align-items:baseline"><b>Saldo pendiente</b><span class="total" style="color:#9A3412">$233.000</span></div>
+        </div>
+        <h2>Historial de pagos</h2>
+        <div class="item" style="padding:0">
+          <div class="sum" style="padding:14px 16px;border-bottom:1px solid var(--soft)"><span><b>Anticipo · OT-0148</b><br><small>19 oct 2026 · Efectivo</small></span><b>$200.000</b></div>
+          <div class="sum" style="padding:14px 16px;border-bottom:1px solid var(--soft)"><span><b>Alineación · OT-0131</b><br><small>2 jun 2026 · Tarjeta</small></span><b>$85.000</b></div>
+          <div class="sum" style="padding:14px 16px"><span><b>Aceite y filtro · OT-0102</b><br><small>18 ene 2026 · Efectivo</small></span><b>$120.000</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="on" data-c="c-agendar" data-t="Agendar cita">Citas</button>
+      <button data-c="c-historial" data-t="Mis vehículos">Vehículos</button>
+      <button data-c="c-pagos" data-t="Pagos y mecánico">Pagos</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fecha en el panel
+  document.getElementById('fecha').textContent =
+    new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  // Modo administrador / cliente
+  function setMode(m){
+    document.getElementById('admin').classList.toggle('hidden', m !== 'admin');
+    document.getElementById('cliente').classList.toggle('hidden', m !== 'cliente');
+    document.getElementById('modeAdmin').classList.toggle('on', m === 'admin');
+    document.getElementById('modeCliente').classList.toggle('on', m === 'cliente');
+  }
+
+  // Navegación del administrador
+  function go(id){
+    document.querySelectorAll('.view').forEach(v => { v.classList.toggle('hidden', v.id !== id); });
+    document.querySelectorAll('.side nav button').forEach(b => b.classList.toggle('on', b.dataset.view === id));
+  }
+  document.querySelectorAll('.side nav button').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
+
+  // Validación del documento (setter con 3 intentos)
+  let intentos = 0;
+  function buscar(){
+    const doc = document.getElementById('doc').value.trim();
+    const err = document.getElementById('docError');
+    if (/^\d+$/.test(doc)){
+      intentos = 0;
+      err.classList.add('hidden');
+      document.getElementById('resultado').classList.remove('hidden');
+      return;
+    }
+    intentos++;
+    document.getElementById('resultado').classList.add('hidden');
+    err.classList.remove('hidden');
+    err.textContent = intentos >= 3
+      ? 'Se agotaron los 3 intentos. Contacta a un administrador.'
+      : 'El documento "' + doc + '" no es válido. Debe contener solo números. Intento ' + intentos + ' de 3.';
+  }
+
+  // Completar orden
+  function completar(){
+    const chip = document.getElementById('estadoChip');
+    chip.textContent = 'Completado';
+    chip.className = 'chip done';
+    document.getElementById('segProc').classList.remove('on');
+    document.getElementById('segDone').classList.add('on');
+  }
+
+  // Navegación del cliente
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.cview').forEach(v => v.classList.toggle('hidden', v.id !== b.dataset.c));
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+    document.getElementById('cliTitulo').textContent = b.dataset.t;
+  }));
+
+  // Selección de horarios
+  document.querySelectorAll('#slots button, #slots2 button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#slots button, #slots2 button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    document.getElementById('confirmar').textContent = 'Confirmar cita · ' + b.textContent;
+  }));
+</script>
+</body>
+</html>
